@@ -260,13 +260,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
     -- gopls = {},
     -- pyright = {},
     -- rust_analyzer = {},
-    -- tsserver = {},
+    tsserver = {},
+    nil_ls = {},
   
     -- lua_ls = {
-    --   Lua = {
-    --     workspace = { checkThirdParty = false },
-    --     telemetry = { enable = false },
-    --   },
+    --  Lua = {
+    --   workspace = { checkThirdParty = false },
+    --    telemetry = { enable = false },
+    --  },
     -- },
   }
   

@@ -76,6 +76,7 @@
           alejandra # nix formatter alternative
           statix # linter for nix
           shellcheck
+          nixpkgs-fmt
           # luajitPackages.lua-lsp
           lua-language-server
           nodePackages.eslint_d # js/ts code formatter and linter
@@ -103,7 +104,7 @@
       packages.nvim = pkgs.wrapNeovim neovim-augmented {
         viAlias = true;
         vimAlias = true;
-        withNodeJs = false;
+        withNodeJs = true;
         withPython3 = false;
         withRuby = false;
         extraPython3Packages = false;
@@ -131,7 +132,6 @@
                 neodev-nvim
                 plenary-nvim
                 copilot-vim
-                
 
                 # UI #################################################
                 onedarkpro-nvim # colorscheme
