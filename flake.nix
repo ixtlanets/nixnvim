@@ -152,8 +152,8 @@
                 bufferline-nvim
                 indent-blankline-nvim # visual indent
                 toggleterm-nvim # better terminal management
-                #nvim-treesitter.withAllGrammars # better code coloring (not sure withAllGrammars works anymore)
-                (nvim-treesitter.withPlugins (_: pkgs.tree-sitter.allGrammars)) # better code coloring
+                nvim-treesitter.withAllGrammars # better code coloring (not sure withAllGrammars works anymore)
+                #(nvim-treesitter.withPlugins (_: pkgs.tree-sitter.allGrammars)) # better code coloring
                 playground # treesitter playground
                 nvim-treesitter-textobjects # jump around and select based on syntax (class, function, etc.)
                 nvim-treesitter-context # keep current block header (func defn or whatever) on first line
