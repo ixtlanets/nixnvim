@@ -61,7 +61,6 @@
           fzy
           zoxide
           cargo
-          gccgo
           bat # previewer for telescope for now
           zk # lsp for markdown notes
           zsh # terminal requires it
