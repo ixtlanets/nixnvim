@@ -136,6 +136,7 @@
 
                 # UI #################################################
                 onedarkpro-nvim # colorscheme
+                catppuccin-nvim # another colorscheme
                 ir_black # colorscheme for basic terminals
                 telescope-nvim # da best popup fuzzy finder
                 telescope-fzy-native-nvim # with fzy gives better results

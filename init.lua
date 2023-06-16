@@ -38,13 +38,13 @@ require('gitsigns').setup {
 }
 require('lualine').setup {
     options = {
-        theme = 'onedark',
+        theme = 'catppuccin',
         component_separators = '|',
         section_separators = ''
     }
 }
 
-vim.cmd.colorscheme 'onedark'
+vim.cmd.colorscheme 'catppuccin-mocha'
 -- Set highlight on search
 vim.o.hlsearch = false
 
