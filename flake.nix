@@ -93,6 +93,7 @@
         ]
         ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
           ueberzug
+          gccgo
           xclip # needed by vim clipboard-image plugin
           wl-clipboard # needed by vim clipboard-image plugin
         ]
