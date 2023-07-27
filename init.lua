@@ -62,7 +62,8 @@ vim.o.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.o.breakindent = true
-
+vim.o.showbreak = "» "
+vim.o.linebreak = true -- wraps on word boundaries but only if nolist is set
 -- Save undo history
 vim.o.undofile = true
 
@@ -83,6 +84,21 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
+
+vim.o.grepprg = "rg --vimgrep --no-heading --smart-case --color never"
+vim.o.grepformat = "%f:%l:%c:%m,%f:%l:%m,%f"
+
+-- ignore completions and menus for the below
+vim.o.wildignore = "*/node_modules/*,_site,*/__pycache__/,*/venv/*,*/target/*,*/.vim$,\\~$,*/.log,*/.aux,*/.cls,*/.aux,*/.bbl,*/.blg,*/.fls,*/.fdb*/,*/.toc,*/.out,*/.glo,*/.log,*/.ist,*/.fdb_latexmk,*.bak,*.o,*.a,*.sw?,.git/,*.class,.direnv/,.DS_Store,*/Backups/*"
+vim.o.wildmenu = true           -- cmd line completion a-la zsh
+vim.o.wildmode = "list:longest" -- matches mimic that of bash or zsh
+
+vim.o.ruler = true      -- show the cursor position all the time
+vim.o.cursorline = true -- add indicator for current line
+vim.o.viewoptions = "folds,cursor,unix,slash" -- better unix / windows compatibility
+
+vim.o.icm = "nosplit"    -- show substitutions as you type
+vim.o.autoread = true -- auto reload files changed on disk if not changed in buffer
 
 -- [[ Basic Keymaps ]]
 
@@ -206,6 +222,9 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open float
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
 -- [[ Configure LSP ]]
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 --  This function gets run when an LSP connects to a particular buffer.
   local on_attach = function(_, bufnr)
     -- NOTE: Remember that lua is a real programming language, and as such it is possible
@@ -218,24 +237,24 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
       if desc then
         desc = 'LSP: ' .. desc
       end
-  
+
       vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
     end
-  
+
     nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
     nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-  
+
     nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
     nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
     nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
     nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
     nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
     nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-  
+
     -- See `:help K` for why this keymap
     nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
     nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-  
+
     -- Lesser used LSP functionality
     nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
     nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
@@ -243,66 +262,112 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
     nmap('<leader>wl', function()
       print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, '[W]orkspace [L]ist Folders')
-  
+
     -- Create a command `:Format` local to the LSP buffer
     vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
       vim.lsp.buf.format()
     end, { desc = 'Format current buffer with LSP' })
   end
-  
-  -- Enable the following language servers
-  --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-  --
-  --  Add any additional override configuration in the following tables. They will be passed to
-  --  the `settings` field of the server config. You must look up that documentation yourself.
-  local servers = {
-    -- clangd = {},
-    -- gopls = {},
-    -- pyright = {},
-    -- rust_analyzer = {},
-    tsserver = {},
-    nil_ls = {},
-  
-    -- lua_ls = {
-    --  Lua = {
-    --   workspace = { checkThirdParty = false },
-    --    telemetry = { enable = false },
-    --  },
-    -- },
-  }
-  
+
   -- Setup neovim lua configuration
-  require('neodev').setup()
-  require('mason').setup()
-  
-  -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-  local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-  
-  -- Ensure the servers above are installed
-  local mason_lspconfig = require 'mason-lspconfig'
-  
-  mason_lspconfig.setup {
-    ensure_installed = vim.tbl_keys(servers),
-  }
-  
-  mason_lspconfig.setup_handlers {
-    function(server_name)
-      require('lspconfig')[server_name].setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        settings = servers[server_name],
-      }
+  require('neodev').setup({
+    -- help for neovim lua api
+    override = function(root_dir, library)
+      if string.match(root_dir, "neovim") or
+        string.match(root_dir, "pwnvim") or
+        string.match(root_dir, "lua") then
+        library.enabled = true
+        library.plugins = true
+        library.types = true
+        library.runtime = true
+      end
     end,
+    lspconfig = true
+    }
+  )
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+    vim.lsp.handlers.hover,
+    { border = "rounded" })
+
+  vim.lsp.handlers["textDocument/signatureHelp"] =
+      vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded" })
+
+  local lspconfig = require("lspconfig")
+  lspconfig.tsserver.setup { capabilities = capabilities, on_attach = on_attach }
+  lspconfig.lua_ls.setup {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    filetypes = { "lua" },
+    settings = {
+      Lua = {
+        runtime = {
+          -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+          version = 'LuaJIT'
+        },
+        diagnostics = {
+          -- Get the language server to recognize the `vim` global
+          globals = { 'vim', "string", "require" }
+        },
+        workspace = {
+          -- Make the server aware of Neovim runtime files
+          library = vim.api.nvim_get_runtime_file("", true),
+          checkThirdParty = false
+        },
+        -- Do not send telemetry data containing a randomized but unique identifier
+        telemetry = { enable = false },
+        completion = { enable = true, callSnippet = "Replace" }
+      }
+    }
   }
-  
+  lspconfig.svelte.setup { on_attach = on_attach, capabilities = capabilities }
+  lspconfig.tailwindcss.setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+      files = { exclude = { "**/.git/**", "**/node_modules/**", "**/*.md" } }
+    }
+  }
+  -- nil_ls is a nix lsp
+  lspconfig.nil_ls.setup { on_attach = on_attach, capabilities = capabilities }
+  lspconfig.cssls.setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = { css = { lint = { unknownAtRules = "ignore" } } }
+  }
+  lspconfig.eslint.setup { on_attach = on_attach, capabilities = capabilities }
+  lspconfig.html.setup { on_attach = on_attach, capabilities = capabilities }
+  lspconfig.bashls.setup { on_attach = on_attach, capabilities = capabilities }
+  -- TODO: investigate nvim-metals and remove line below
+  lspconfig.metals.setup { on_attach = on_attach, capabilities = capabilities }                            -- for scala
+  lspconfig.pyright.setup { on_attach = on_attach, capabilities = capabilities, filetypes = { "python" } } -- for python
+  lspconfig.jsonls.setup {
+    on_attach = on_attach,
+    settings = {
+      json = {
+        schemas = require('schemastore').json.schemas(),
+        validate = { enable = true }
+      }
+    },
+    setup = {
+      commands = {
+        Format = {
+          function()
+            vim.lsp.buf.range_formatting({}, { 0, 0 },
+              { vim.fn.line "$", 0 })
+          end
+        }
+      }
+    },
+    capabilities = capabilities
+  }
+
   -- [[ Configure nvim-cmp ]]
   -- See `:help cmp`
   local cmp = require 'cmp'
   local luasnip = require 'luasnip'
   require('luasnip.loaders.from_vscode').lazy_load()
   luasnip.config.setup {}
-  
+
   cmp.setup {
     snippet = {
       expand = function(args)
