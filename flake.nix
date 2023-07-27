@@ -128,12 +128,12 @@
                 vim-rhubarb
                 vim-sleuth
                 nvim-lspconfig
-                mason-nvim
-                mason-lspconfig-nvim
                 fidget-nvim
                 neodev-nvim
                 plenary-nvim
                 copilot-vim
+                null-ls-nvim # formatting and linting via lsp system
+                SchemaStore-nvim # json schemas
 
                 # UI #################################################
                 onedarkpro-nvim # colorscheme
